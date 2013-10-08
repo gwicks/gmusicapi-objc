@@ -3,7 +3,7 @@
 //  gTunes
 //
 //  Created by Gregory Wicks on 10/3/13.
-//  Copyright (c) 2013 Carney Labs. All rights reserved.
+//  Copyright (c) 2013 Gregory Wicks. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
