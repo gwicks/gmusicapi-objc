@@ -11,10 +11,6 @@
 @interface GoogleMusicAPI : NSObject
 
 -(void)loginWithUsername:(NSString*)username withPassword:(NSString*)password;
-<<<<<<< HEAD
-=======
-
->>>>>>> 654c9e92fdeb46eb1a4700f748fc929cedbdc68f
 -(NSMutableArray*)getAllSongs;
 -(NSString*)getStreamUrl:(NSString*)songID;
 
