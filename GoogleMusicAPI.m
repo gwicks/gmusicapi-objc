@@ -98,11 +98,45 @@ int stage = 0;
     
     
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
+    //NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
 }
 
 -(NSMutableArray*)getAllSongs
 {
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://play.google.com/music/services/loadalltracks?u=0&xt=%@",xtToken]]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:[NSString stringWithFormat:@"GoogleLogin auth=%@",authToken] forHTTPHeaderField:@"Authorization"];
+    
+    
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    
+    NSError *error;
+    NSURLResponse *response;
+    NSData *respon = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    mfinalResponse = [[NSString alloc] initWithData:respon encoding:NSUTF8StringEncoding];
+    NSError *localerror;
+    NSData *jsonData = [mfinalResponse dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *pString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    
+    NSDictionary *songDict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&localerror];
+    if (localerror)
+    {
+        NSLog(@"%@",[localerror description]);
+    }
+    else
+    {
+        mSongArr = [[NSMutableArray alloc] init];
+        NSLog(@"Successfully parsed");
+        NSArray *songArray = songDict[@"playlist"];
+        NSLog(@"%d",[songArray count]);
+        for (NSDictionary *song in songArray)
+        {
+            [mSongArr addObject:song];
+        }
+        NSLog(@"%d",[mSongArr count]);
+        
+    }
     return mSongArr;
 }
 
@@ -155,8 +189,8 @@ int stage = 0;
     }
     else if (stage == 1)
     {
-        stage = 2;
-        [self readSongs];
+        //stage = 2;
+        //[self readSongs];
     }
     else if (stage == 2)
     {
