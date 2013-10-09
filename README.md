@@ -3,6 +3,10 @@ gmusicapi-objc
 
 Objective-C/iOS port of the Unofficial Google Music API
 
+Currently very, very basic, only supports getting all songs and retrieving stream urls.
+
+
+
 
 Usage
 ==============
