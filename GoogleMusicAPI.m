@@ -15,11 +15,19 @@ NSString *xtToken = @"";
 NSMutableArray *mSongArr;
 NSString *mfinalResponse = @"";
 NSString *urlResponse = @"";
+
+NSString *usename = @"";
+NSString *pwd = @"";
+
 int stage = 0;
 
 -(void)loginWithUsername:(NSString*)username withPassword:(NSString*)password
 {
+    usename = username;
+    pwd = password;
     NSString *post = [NSString stringWithFormat:@"&Email=%@&Passwd=%@&service=sj",username,password];
+    
+    
     
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%d",[postData length]];
@@ -54,12 +62,11 @@ int stage = 0;
     else if (stage == 1)
     {
         NSString *response = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
-        //NSLog(response);
-        //NSLog(@"Cookies:");
         NSHTTPCookieStorage *cookieJar = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        //Nab the almighty xt cookie's data, it's important
         for (NSHTTPCookie *cookie in [cookieJar cookies])
         {
-            //NSLog(@"%@",cookie);
+            
             if ([[cookie name] isEqualToString:@"xt"])
             {
                 xtToken = [cookie value];
@@ -99,6 +106,15 @@ int stage = 0;
     
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     //NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
+}
+
+
+- (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    [[challenge sender] useCredential:[NSURLCredential
+                                       credentialWithUser:usename
+                                       password:pwd
+                                       persistence:NSURLCredentialPersistencePermanent] forAuthenticationChallenge:challenge];
+    
 }
 
 -(NSMutableArray*)getAllSongs
