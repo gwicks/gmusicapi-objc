@@ -5,7 +5,7 @@ Objective-C/iOS port of the Unofficial Google Music API
 
 Currently very, very basic, only supports getting all songs and retrieving stream urls.
 
-Update (March 2014): May now be broken, due to changes in Google's Webclient interface, untested.
+Update (March 2014): Currently broekn, due to changes in the Google Webclient interface. Needs to be reworked.
 
 
 Usage
