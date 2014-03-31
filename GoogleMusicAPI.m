@@ -99,7 +99,7 @@ int stage = 0;
 {
     stage = 2;
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://play.google.com/music/services/loadalltracks?u=0&xt=%@",xtToken]]];
+    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://play.google.com/music/services/streamingloadalltracks?u=0&xt=%@==&format=jsarray",xtToken]]];
     [request setHTTPMethod:@"POST"];
     [request setValue:[NSString stringWithFormat:@"GoogleLogin auth=%@",authToken] forHTTPHeaderField:@"Authorization"];
     
@@ -120,7 +120,7 @@ int stage = 0;
 -(NSMutableArray*)getAllSongs
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://play.google.com/music/services/loadalltracks?u=0&xt=%@",xtToken]]];
+    [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://play.google.com/music/services/streamingloadalltracks?u=0&xt=%@==&format=jsarray",xtToken]]];
     [request setHTTPMethod:@"POST"];
     [request setValue:[NSString stringWithFormat:@"GoogleLogin auth=%@",authToken] forHTTPHeaderField:@"Authorization"];
     
@@ -131,11 +131,30 @@ int stage = 0;
     NSURLResponse *response;
     NSData *respon = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     mfinalResponse = [[NSString alloc] initWithData:respon encoding:NSUTF8StringEncoding];
+    NSRange range = [mfinalResponse rangeOfString:@"<script type='text/javascript'>\nwindow.parent['slat_process'](["];
+    mfinalResponse = [mfinalResponse substringFromIndex:NSMaxRange(range)];
+    NSRange endRange = [mfinalResponse rangeOfString:@");\nwindow.parent['slat_progress']"];
+    mfinalResponse = [mfinalResponse substringToIndex:endRange.location];
+    
+    
+    
+    mfinalResponse = [NSString stringWithFormat:@"{\"playlist\":%@}",mfinalResponse];
+    mfinalResponse = [mfinalResponse stringByReplacingOccurrencesOfString:@",," withString:@","];
+    while ([mfinalResponse rangeOfString:@",,"].location != NSNotFound)
+    {
+        mfinalResponse = [mfinalResponse stringByReplacingOccurrencesOfString:@",," withString:@",\"\","];
+    }
+    NSRange lastComma = [mfinalResponse rangeOfString:@"," options:NSBackwardsSearch];
+    mfinalResponse = [mfinalResponse substringToIndex:lastComma.location];
+    mfinalResponse = [NSString stringWithFormat:@"%@}",mfinalResponse];
+    NSLog(@"%@",mfinalResponse);
+    
+    
     NSError *localerror;
     NSData *jsonData = [mfinalResponse dataUsingEncoding:NSUTF8StringEncoding];
     NSString *pString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     
-    NSDictionary *songDict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&localerror];
+    NSDictionary *songDict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&localerror];
     if (localerror)
     {
         NSLog(@"%@",[localerror description]);
@@ -146,9 +165,20 @@ int stage = 0;
         NSLog(@"Successfully parsed");
         NSArray *songArray = songDict[@"playlist"];
         NSLog(@"%d",[songArray count]);
-        for (NSDictionary *song in songArray)
+        NSDictionary *tempDict;
+        for (NSArray *song in songArray)
         {
-            [mSongArr addObject:song];
+            if ([[song objectAtIndex:2] length] > 0)
+            {
+                tempDict = @{@"id":[song objectAtIndex:0],@"title":[song objectAtIndex:1],@"artist":[song objectAtIndex:3],@"album":[song objectAtIndex:4],@"genre":[song objectAtIndex:10],@"year":@"",@"durationMillis":[song objectAtIndex:11],@"albumArtUrl":[song objectAtIndex:2]};
+            }
+            else
+            {
+            tempDict = @{@"id":[song objectAtIndex:0],@"title":[song objectAtIndex:1],@"artist":[song objectAtIndex:3],@"album":[song objectAtIndex:4],@"genre":@"",@"year":@"",@"durationMillis":[song objectAtIndex:11]};
+            }
+            NSLog(@"%@,%@",[song objectAtIndex:1],[song objectAtIndex:2]);
+            
+            [mSongArr addObject:tempDict];
         }
         NSLog(@"%d",[mSongArr count]);
         
@@ -213,7 +243,7 @@ int stage = 0;
         NSError *localerror;
         NSData *jsonData = [mfinalResponse dataUsingEncoding:NSUTF8StringEncoding];
         NSString *pString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        
+        NSLog(@"%@",pString);
         NSDictionary *songDict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&localerror];
         if (localerror)
         {
