@@ -1,13 +1,7 @@
 gmusicapi-objc
 ==============
 
-Objective-C/iOS port of the Unofficial Google Music API
-
-Currently very, very basic, only supports getting all songs and retrieving stream urls.
-
-Update (March 2014): Currently partially broken, due to changes in the Google Webclient interface. Metadata is probably inconsistent.
-
-Update (July 2015): Reworked from the ground up due to changes in the login system, now requires that you subclass it as a view to use it. See the example code for reference.
+Dead now (like Google Music itself, RIP)
 
 Usage
 ==============
